@@ -13,7 +13,15 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     [SerializeField] TMPro.TMP_Dropdown _screenGameViewDropdown;
     [SerializeField] TMPro.TextMeshProUGUI _screenNumberText;
     UGLSubCamera _camera;
-    int screenNumer => UGLMultiScreen.I.inSimulationMode ? (_camera.cameraNumber) : _camera.camera.targetDisplay;
+    UGLSubCamera camera
+    {
+        get
+        {
+            if (_camera == null) _camera = GetComponentInParent<UGLSubCamera>();
+            return _camera;
+        }
+    }
+    int screenNumer => UGLMultiScreen.I.inSimulationMode ? (camera.screenNumber) : camera.camera.targetDisplay;
     public static bool AdminPanelsOpen
     {
         get => _AdminPanelsOpen;
@@ -36,32 +44,48 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
             }
         }
     }
+    static bool ignoreDropdownChanges = false;
 
     private void Start()
     {
-        _camera = GetComponentInParent<UGLSubCamera>();
-        _screenGameViewDropdown.value = screenNumer -1;
+        
         _screenGameViewDropdown.onValueChanged.AddListener(OnDropDownChange);
+        ignoreDropdownChanges = true;
         Refresh();
+        ignoreDropdownChanges = false;
     }
 
     private void OnDropDownChange(int gameView)
     {
+        if (ignoreDropdownChanges) return;
+
         var desiredGameView = UGLMultiScreen.I.GetCamera(gameView);
-        desiredGameView.SetOutputScreen(this.screenNumer);
+        var desiredViewCurrentOutput = desiredGameView.screenNumber;
+        var currentCamScreenNumber = _camera.screenNumber;
+        _camera.SetOutputScreen(desiredViewCurrentOutput);
+        desiredGameView.SetOutputScreen(currentCamScreenNumber);
         RefreshAll();
     }
 
     private void RefreshAll()
     {
+        ignoreDropdownChanges = true;
         foreach (var panel in GameObject.FindObjectsByType<UGLMultiScreenAdminPanel>(FindObjectsSortMode.None))
         {
             panel.Refresh();
         }
+        ignoreDropdownChanges = false;
+
+        if (UGLMultiScreen.I.inSimulationMode)
+        {
+            UGLMultiScreen.I.RefreshSimulationView();
+        }
     }
 
+    [ContextMenu("Force Refresh")]
     void Refresh()
     {
-        _screenNumberText.text = $"SCREEN #{screenNumer}";
+        _screenNumberText.text = $"Display {screenNumer+1}";
+        _screenGameViewDropdown.value = this.camera.cameraNumber;
     }
 }

@@ -3,6 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using XUUtils;
+using Unity.VisualScripting;
 
 public class UGLMultiScreen : MonoBehaviour
 {
@@ -72,21 +73,30 @@ public class UGLMultiScreen : MonoBehaviour
         this.GetArrangementExtents(out var arrangementSize);
         Vector3 offset = new Vector3(arrangementSize.x - 1, arrangementSize.y - 1, 0) * .5f;
 
-        for (int i = 0; i < N_MONITORS; i++)
+        foreach(var cam in Cameras)
         {
-            var cam = GetCamera(i);
-            Vector3 arrangeLocation = this.getArrangementLocation(i+1).asXyVector3() - offset;
+            var i = cam.screenNumber;
+            Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - offset;
             arrangeLocation.y *= -1;
             cam.transform.localPosition = cameraSpacing * Vector3.Scale(arrangeLocation, new Vector3(1, SUBSCREEN_H_O_W));
         }
     }
 
-    public UGLSubCamera GetCamera(int i)
+    public UGLSubCamera GetCameraByScreen(int screenIdx)
     {
-        return this.Cameras[i];
+        foreach(var cam in this.Cameras)
+        {
+            if (cam.screenNumber == screenIdx) return cam;
+        }
+        return null;
+    }
+    public UGLSubCamera GetCamera(int cameraIdx)
+    {
+        return this.Cameras[cameraIdx];
     }
 
 
+    public void RefreshSimulationView() => SetSingleScreenSimulationMode(inSimulationMode);
     void SetSingleScreenSimulationMode(bool enable)
     {
         inSimulationMode = enable;
@@ -212,7 +222,9 @@ public class UGLMultiScreen : MonoBehaviour
         {
             base.OnInspectorGUI();
 
+
             var script = target as UGLMultiScreen;
+            bool changed = false;
 
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
@@ -220,7 +232,7 @@ public class UGLMultiScreen : MonoBehaviour
 
 
             GUILayout.Label("Screen Arangement");
-
+            
 
             GUILayout.Label($"{script.nAssigned}/{N_MONITORS}");
 
@@ -235,7 +247,7 @@ public class UGLMultiScreen : MonoBehaviour
                     if (nuVal != curVal)
                     {
                         script.arrangementGrid[idx] = nuVal;
-                        EditorUtility.SetDirty(script);
+                        changed = true;
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -247,19 +259,28 @@ public class UGLMultiScreen : MonoBehaviour
             if (GUILayout.Button("Toggle Sim Mode"))
             {
                 script.SetSingleScreenSimulationMode(!script.inSimulationMode);
+                changed = true;
             }
 
             if (GUILayout.Button("Refresh Game View"))
             {
                 script.SetSingleScreenSimulationMode(script.inSimulationMode);
+                changed = true;
             }
 
             if (GUILayout.Button("Arrange Cameras"))
             {
                 script.ArrangeCameras();
+                changed = true;
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
+
+            if (changed)
+            {
+                EditorUtility.SetDirty(script.gameObject);
+                PrefabUtility.RecordPrefabInstancePropertyModifications(script);
+            }
         }
     }
 #endif
