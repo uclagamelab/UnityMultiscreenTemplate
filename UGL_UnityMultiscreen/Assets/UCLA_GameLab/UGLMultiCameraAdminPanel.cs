@@ -13,7 +13,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     [SerializeField] TMPro.TMP_Dropdown _screenGameViewDropdown;
     [SerializeField] TMPro.TextMeshProUGUI _screenNumberText;
     UGLSubCamera _camera;
-    int screeNo => UGLMultiScreen.I.inSimulationMode ? (_camera.cameraNumber) : _camera.camera.targetDisplay;
+    int screenNumer => UGLMultiScreen.I.inSimulationMode ? (_camera.cameraNumber) : _camera.camera.targetDisplay;
     public static bool AdminPanelsOpen
     {
         get => _AdminPanelsOpen;
@@ -40,7 +40,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     private void Start()
     {
         _camera = GetComponentInParent<UGLSubCamera>();
-        _screenGameViewDropdown.value = screeNo -1;
+        _screenGameViewDropdown.value = screenNumer -1;
         _screenGameViewDropdown.onValueChanged.AddListener(OnDropDownChange);
         Refresh();
     }
@@ -48,11 +48,20 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     private void OnDropDownChange(int gameView)
     {
         var desiredGameView = UGLMultiScreen.I.GetCamera(gameView);
+        desiredGameView.SetOutputScreen(this.screenNumer);
+        RefreshAll();
+    }
+
+    private void RefreshAll()
+    {
+        foreach (var panel in GameObject.FindObjectsByType<UGLMultiScreenAdminPanel>(FindObjectsSortMode.None))
+        {
+            panel.Refresh();
+        }
     }
 
     void Refresh()
     {
-      
-        _screenNumberText.text = $"SCREEN #{screeNo}";
+        _screenNumberText.text = $"SCREEN #{screenNumer}";
     }
 }

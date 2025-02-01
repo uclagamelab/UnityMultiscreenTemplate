@@ -93,13 +93,13 @@ public class UGLMultiScreen : MonoBehaviour
         this.GetArrangementExtents(out var offset, out var size);
         Vector2 gameViewSize = new Vector2(Screen.width, Screen.height);
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR //in editor, Screen.Width and Screen.height don't return the rendering size
         {
             PlayModeWindow.GetRenderingResolution(out var gameViewSizeX, out var gameViewSizeY);//GetMainGameViewSize();
             gameViewSize.x = gameViewSizeX;
             gameViewSize.y = gameViewSizeY;
         }
-#endif
+        #endif
 
         float screenHoW = gameViewSize.y / gameViewSize.x;
 
@@ -124,9 +124,12 @@ public class UGLMultiScreen : MonoBehaviour
 
         foreach (var cam in this.Cameras)
         {
+            cam.setSimulationMode(inSimulationMode);
+
             if (!inSimulationMode)
             {
                 cam.camera.rect = new Rect(0, 0, 1, 1);
+             
             }
             else
             {
@@ -177,11 +180,11 @@ public class UGLMultiScreen : MonoBehaviour
                 int i = yi * N_MONITORS + xi;
                 if (_arrangementGrid[i])
                 {
-                    nFound++;
                     if (screenNumber == nFound)
                     {
                         return new Vector2(xi - offset.x, yi - offset.y);
                     }
+                    nFound++;
                 }
             }
         }
