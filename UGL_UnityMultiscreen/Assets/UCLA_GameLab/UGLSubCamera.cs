@@ -11,15 +11,16 @@ public class UGLSubCamera : MonoBehaviour
     public Camera camera => _camera;
 
 
-    void Start()
+    void Awake()
     {
-        
+        //ResetOverrideScreenNumber();
     }
 
-
-    void Update()
+    void ResetOverrideScreenNumber() => SetOutputScreen(-1);
+    public void SetOutputScreen(int screenNumber)
     {
-        
+        this.overrideScreenIdx = screenNumber;
+        this.camera.targetDisplay = this.screenNumber;
     }
 
 }

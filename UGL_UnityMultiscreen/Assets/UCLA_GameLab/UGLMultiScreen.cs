@@ -6,7 +6,15 @@ using XUUtils;
 
 public class UGLMultiScreen : MonoBehaviour
 {
-    public static UGLMultiScreen I { get; private set; }
+    static UGLMultiScreen _I; 
+    public static UGLMultiScreen I 
+    { 
+        get
+        {
+            if(_I == null) _I = GameObject.FindFirstObjectByType<UGLMultiScreen>();
+            return _I;
+        }
+    }
 
     const int N_MONITORS = 6;
     int2[] arrangement = { new int2(0, 0), };
@@ -41,12 +49,12 @@ public class UGLMultiScreen : MonoBehaviour
 
     void Awake()
     {
-        I = this;
+        
     }
 
     private void OnDestroy()
     {
-        if (I == this) I = null;
+        if (_I == this) _I = null;
     }
 
 
