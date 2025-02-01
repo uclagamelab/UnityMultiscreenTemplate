@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GLMultiCameraAdminPanel : MonoBehaviour
+public class UGLMultiScreenAdminPanel : MonoBehaviour
 {
     public Canvas canvas;
-    static List<GLMultiCameraAdminPanel> all;
+    static List<UGLMultiScreenAdminPanel> all;
 
     static bool _AdminPanelsOpen = true;
     public static bool AdminPanelsOpen
@@ -17,14 +17,14 @@ public class GLMultiCameraAdminPanel : MonoBehaviour
 
             if (all == null)
             {
-                all = new List<GLMultiCameraAdminPanel>();
+                all = new List<UGLMultiScreenAdminPanel>();
                 foreach (var ro in SceneManager.GetActiveScene().GetRootGameObjects())
                 {
-                    all.AddRange(ro.GetComponentsInChildren<GLMultiCameraAdminPanel>());
+                    all.AddRange(ro.GetComponentsInChildren<UGLMultiScreenAdminPanel>());
                 }
             }
 
-            foreach (GLMultiCameraAdminPanel panel in all)
+            foreach (UGLMultiScreenAdminPanel panel in all)
             {
                 panel.canvas.gameObject.SetActive(_AdminPanelsOpen);
             }

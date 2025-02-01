@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GLMultiCamera : MonoBehaviour
+public class UGLSubCamera : MonoBehaviour
 {
     int overrideScreenIdx = -1;
     public int cameraNumber => this.transform.GetSiblingIndex() + 1;

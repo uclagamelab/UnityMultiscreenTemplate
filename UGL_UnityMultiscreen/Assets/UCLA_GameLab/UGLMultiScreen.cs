@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using XUUtils;
 
-public class GLMultiScreen : MonoBehaviour
+public class UGLMultiScreen : MonoBehaviour
 {
-    public static GLMultiScreen I { get; private set; }
+    public static UGLMultiScreen I { get; private set; }
 
     const int N_MONITORS = 6;
     int2[] arrangement = { new int2(0, 0), };
@@ -14,7 +14,7 @@ public class GLMultiScreen : MonoBehaviour
 
     static readonly Vector2 SUBSCREEN_ASPECT_RATIO_VEC = new Vector2(4, 3);
     const float SUBSCREEN_H_O_W = 3f / 4f; //Height over width (aspect ratio of monitors)
-    public List<GLMultiCamera> Cameras = new();
+    public List<UGLSubCamera> Cameras = new();
 
     public bool inSimulationMode = false;
     public bool[] arrangementGrid
@@ -54,7 +54,7 @@ public class GLMultiScreen : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha7))
         {
-            GLMultiCameraAdminPanel.AdminPanelsOpen = !GLMultiCameraAdminPanel.AdminPanelsOpen;
+            UGLMultiScreenAdminPanel.AdminPanelsOpen = !UGLMultiScreenAdminPanel.AdminPanelsOpen;
         }
     }
 
@@ -73,7 +73,7 @@ public class GLMultiScreen : MonoBehaviour
         }
     }
 
-    public GLMultiCamera GetCamera(int i)
+    public UGLSubCamera GetCamera(int i)
     {
         return this.Cameras[i];
     }
@@ -194,14 +194,14 @@ public class GLMultiScreen : MonoBehaviour
 
 #if UNITY_EDITOR
 
-    [CustomEditor(typeof(GLMultiScreen))]
+    [CustomEditor(typeof(UGLMultiScreen))]
     public class Ed : Editor
     {
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
 
-            var script = target as GLMultiScreen;
+            var script = target as UGLMultiScreen;
 
             GUILayout.Space(10);
             GUILayout.BeginHorizontal();
