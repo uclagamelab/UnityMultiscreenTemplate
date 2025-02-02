@@ -12,14 +12,15 @@ public class MultiScreenObjectDebugger : MonoBehaviour
     void Update()
     {
         string text = "";
-        foreach (var cam in _mso.GetAllIntersectingCameras()) 
+        foreach (var cam in _mso.GetAllIntersectingCameras())
         {
             if (!string.IsNullOrEmpty(text))
             {
                 text += ", ";
             }
-            text += $"{cam.cameraNumber}";   
+            text += $"{cam.cameraNumber}";
         }
-        _textMeshPro.text = text;
+        _textMeshPro.text = $"all visible: ({text})";
+        _textMeshPro.text += $"\nlast entered:{_mso.lastEnteredCamera}";
     }
 }
