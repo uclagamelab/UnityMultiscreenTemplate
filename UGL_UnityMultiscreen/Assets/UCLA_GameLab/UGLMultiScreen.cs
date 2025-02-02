@@ -48,9 +48,9 @@ public class UGLMultiScreen : MonoBehaviour
     }
 
 
-    void Awake()
+    void Start()
     {
-        
+        this.RefreshSimulationView();
     }
 
     private void OnDestroy()

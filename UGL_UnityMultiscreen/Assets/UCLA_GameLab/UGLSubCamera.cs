@@ -30,10 +30,14 @@ public class UGLSubCamera : MonoBehaviour
     void Awake()
     {
         //ResetOverrideScreenNumber();
+        if (UGLMultiScreenPrefs.Data.screenRemappingOk())
+        {
+            this.SetOutputScreen(UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber], false);
+        }
     }
 
     public void ResetOverrideScreenNumber() => SetOutputScreen(-1);
-    public void SetOutputScreen(int screenNumber)
+    public void SetOutputScreen(int screenNumber, bool writeToSaveData = true)
     {
         if (!Application.isPlaying)
         {
@@ -43,6 +47,18 @@ public class UGLSubCamera : MonoBehaviour
 
         this.screenNumber = screenNumber;
         this.camera.targetDisplay = UGLMultiScreen.I.inSimulationMode ? 0 : this.screenNumber;
+
+
+        if (writeToSaveData) 
+        try
+        {
+            UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber] = screenNumber;
+            UGLMultiScreenPrefs.SaveAll();
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     internal void setSimulationMode(bool inSimulationMode)
