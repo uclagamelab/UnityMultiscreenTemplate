@@ -94,6 +94,7 @@ public class UGLMultiScreen : MonoBehaviour
                 Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - arrangementCenter;
                 arrangeLocation.y *= -1;
                 cam.transform.localPosition = cameraSpacing * Vector3.Scale(arrangeLocation, new Vector3(1, SUBSCREEN_H_O_W));
+                cam.transform.localRotation = Quaternion.identity;
             }
         }
         else if (this.cameraArrangementStyle == CameraArrangementStyle.FrankenMonoCam)
