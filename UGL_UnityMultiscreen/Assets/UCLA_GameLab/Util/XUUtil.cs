@@ -23,6 +23,8 @@ using Object = UnityEngine.Object;
 using UnityEngine.Playables;
 using XUUtils;
 using XUTransform = XUUtils.XUTransform;
+using UnityEngine.Events;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -3666,6 +3668,20 @@ namespace XUUtils
 
 
             return str;
+        }
+
+        public static void SafeInvoke(this UnityEvent action, bool logExecption = true)
+            => SafeInvoke(action.Invoke, logExecption);
+        public static void SafeInvoke(this System.Action action, bool logExecption = true)
+        {
+            try
+            {
+                action.Invoke();
+            }
+            catch (Exception e)
+            {
+                if (logExecption) Debug.LogException(e);
+            }
         }
 
         #region ANIMATION PROCESSING
