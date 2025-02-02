@@ -3,15 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.IMGUI.Controls;
 using XUUtils;
+using UnityEngine.Events;
 
 public class UGLMultiScreenObject : MonoBehaviour
 {
     //bool[] _intersectingGameViewsPrev = new bool[8];
     bool[] _intersectingGameViews = new bool[8];
     //int lastEnteredCam = -1;
-    bool visibleToAny = false;
+    public bool isVisibleToAnyCamera { get; private set; } = false;
     public Renderer mainRenderer;
     List<int> _visibilityStack = new List<int>(8);
+    int _lastCalcTime = -1;
+
+    //public delegate void OnEnterCameraChangeDelegate(UGLSubCamera camera, bool entered);
+    public delegate void OnAnyEnterCameraChangeDelegate(UGLSubCamera camera, UGLMultiScreenObject obj, bool entered);
+    public static event OnAnyEnterCameraChangeDelegate OnAnyEnterCameraChange = (Camera, obj, enterer) => { };
+    public event OnAnyEnterCameraChangeDelegate OnEnterCameraChange = (Camera, obj, enterer) => { };
+
 
     /// <summary>
     /// The camera that the object most recently entered.
@@ -32,24 +40,25 @@ public class UGLMultiScreenObject : MonoBehaviour
 
     private void Update()
     {
-        refreshVisibilityInfo();
+        refreshVisibilityInfo(true);
     }
 
-    void refreshVisibilityInfo()
+    void refreshVisibilityInfo(bool doCallbacks = false)
     {
-        //for(int i = 0; i < _intersectingGameViews.Length; i++)
+        //if (Time.frameCount == _lastCalcTime)
         //{
-        //    _intersectingGameViews[0] = false;
+        //    return;
         //}
 
-        visibleToAny = false;
+        _lastCalcTime = Time.frameCount;
+        isVisibleToAnyCamera = false;
         foreach(var cam in UGLMultiScreen.Current.Cameras)
         {
             var camNumber = cam.cameraNumber;
             var prevVisible =_intersectingGameViews[camNumber];
             var nowVisible = cam.IsInView(worldBounds);
             
-            visibleToAny |= nowVisible;
+            isVisibleToAnyCamera |= nowVisible;
 
             if (prevVisible != nowVisible) 
             {
@@ -70,19 +79,30 @@ public class UGLMultiScreenObject : MonoBehaviour
                     lastVisibleCamera = camNumber;
                     _visibilityStack.Add(camNumber);
                 }
+
+                if (doCallbacks)
+                {
+                    this.OnEnterCameraChange(cam, this, nowVisible);
+                    OnAnyEnterCameraChange(cam, this, nowVisible);
+                }
             }
         }
         
     }
 
+    //private void OnDrawGizmosSelected()
+    //{
+    //    Gizmos.color = Color.magenta;
+    //    Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+    //}
 
-    private void OnDrawGizmos()
+    public bool isVisibleToCamera(UGLSubCamera cam) => isVisibleToCamera(cam.cameraNumber);
+    public bool isVisibleToCamera(int cameraNumber)
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireCube(worldBounds.center, worldBounds.size);
+        return _intersectingGameViews.GetOrDefault(cameraNumber, false);
     }
 
-    public IEnumerable<UGLSubCamera> GetAllIntersectingCameras()
+    public IEnumerable<UGLSubCamera> getAllIntersectingCameras()
     {
         for (int i = 0; i < _intersectingGameViews.Length; i++)
         {

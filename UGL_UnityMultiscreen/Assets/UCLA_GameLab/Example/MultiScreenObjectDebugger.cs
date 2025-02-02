@@ -12,7 +12,7 @@ public class MultiScreenObjectDebugger : MonoBehaviour
     void Update()
     {
         string text = "";
-        foreach (var cam in _mso.GetAllIntersectingCameras())
+        foreach (var cam in _mso.getAllIntersectingCameras())
         {
             if (!string.IsNullOrEmpty(text))
             {
