@@ -46,7 +46,7 @@ public class UGLSubCamera : MonoBehaviour
         }
 
         this.screenNumber = screenNumber;
-        this.camera.targetDisplay = UGLMultiScreen.I.inSimulationMode ? 0 : this.screenNumber;
+        this.camera.targetDisplay = UGLMultiScreen.Current.inSimulationMode ? 0 : this.screenNumber;
 
 
         if (writeToSaveData) 
@@ -65,6 +65,24 @@ public class UGLSubCamera : MonoBehaviour
     {
         camera.targetDisplay = inSimulationMode ? 0 : screenNumber;
     }
+
+    int lastPlaneCalcFrame = -1;
+    Plane[] cameraPlanes = new Plane[6];
+    public bool IsInView(Renderer renderer) => IsInView(renderer.bounds);
+    public bool IsInView(Bounds bounds)
+    {
+        CachePlanes();
+        return GeometryUtility.TestPlanesAABB(cameraPlanes, bounds);
+    }
+
+    private void CachePlanes()
+    {
+        if (Time.frameCount == lastPlaneCalcFrame)
+            return;
+        lastPlaneCalcFrame = Time.frameCount;
+        GeometryUtility.CalculateFrustumPlanes(this.camera, cameraPlanes);
+    }
+
 #if UNITY_EDITOR
     [CustomEditor(typeof(UGLSubCamera))]
     class Ed : Editor

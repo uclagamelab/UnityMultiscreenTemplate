@@ -21,7 +21,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
             return _camera;
         }
     }
-    int screenNumer => UGLMultiScreen.I.inSimulationMode ? (camera.screenNumber) : camera.camera.targetDisplay;
+    int screenNumer => UGLMultiScreen.Current.inSimulationMode ? (camera.screenNumber) : camera.camera.targetDisplay;
     public static bool AdminPanelsOpen
     {
         get => _AdminPanelsOpen;
@@ -59,7 +59,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     {
         if (ignoreDropdownChanges) return;
 
-        var desiredGameView = UGLMultiScreen.I.GetCamera(gameView);
+        var desiredGameView = UGLMultiScreen.Current.GetCamera(gameView);
         var desiredViewCurrentOutput = desiredGameView.screenNumber;
         var currentCamScreenNumber = _camera.screenNumber;
         _camera.SetOutputScreen(desiredViewCurrentOutput);
@@ -76,9 +76,9 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
         }
         ignoreDropdownChanges = false;
 
-        if (UGLMultiScreen.I.inSimulationMode)
+        if (UGLMultiScreen.Current.inSimulationMode)
         {
-            UGLMultiScreen.I.RefreshCameraSettings();
+            UGLMultiScreen.Current.RefreshCameraSettings();
         }
     }
 

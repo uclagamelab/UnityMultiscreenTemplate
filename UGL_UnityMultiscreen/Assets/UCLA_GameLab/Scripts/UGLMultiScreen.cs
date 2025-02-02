@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 public class UGLMultiScreen : MonoBehaviour
 {
     static UGLMultiScreen _I; 
-    public static UGLMultiScreen I 
+    public static UGLMultiScreen Current 
     { 
         get
         {
@@ -123,6 +123,7 @@ public class UGLMultiScreen : MonoBehaviour
             float subFov = frankenPerspectiveFOV / Mathf.Max(arrangementSize.x, arrangementSize.y);// * SUBSCREEN_H_O_W;
             foreach (var cam in Cameras)
             {
+                cam.camera.orthographic = false;
                 cam.camera.fieldOfView = subFov;
                 var i = cam.screenNumber;
                 Vector2 arrangeLocation = this.getArrangementLocation(i);
