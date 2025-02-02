@@ -78,7 +78,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
 
         if (UGLMultiScreen.I.inSimulationMode)
         {
-            UGLMultiScreen.I.RefreshSimulationView();
+            UGLMultiScreen.I.RefreshCameraSettings();
         }
     }
 

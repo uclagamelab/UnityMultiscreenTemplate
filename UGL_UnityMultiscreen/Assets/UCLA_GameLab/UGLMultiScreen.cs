@@ -17,15 +17,14 @@ public class UGLMultiScreen : MonoBehaviour
         }
     }
 
+    public float cameraSpacing = 2;
+
     const int N_MONITORS = 6;
-    int2[] arrangement = { new int2(0, 0), };
-    [SerializeField] bool[] _arrangementGrid = null;
+
 
     static readonly Vector2 SUBSCREEN_ASPECT_RATIO_VEC = new Vector2(4, 3);
     const float SUBSCREEN_H_O_W = 3f / 4f; //Height over width (aspect ratio of monitors)
-    public List<UGLSubCamera> Cameras = new();
 
-    public bool inSimulationMode = false;
     public bool[] arrangementGrid
     {
         get
@@ -47,10 +46,25 @@ public class UGLMultiScreen : MonoBehaviour
         }
     }
 
+    public enum CameraArrangementStyle
+    {
+        SimpleGrid,
+        FrankenMonoCam,
+    }
+    public CameraArrangementStyle cameraArrangementStyle = CameraArrangementStyle.SimpleGrid;
+    public float frankenFieldOfView = 60;
+    public Vector3 frankenPadding = new Vector2(0, 0);
 
+    #region Serialized, but don't modify Directly
+    [Space(15)]
+    [Header("--- Don't Edit Below ---")]
+    public List<UGLSubCamera> Cameras = new();
+    [SerializeField] bool[] _arrangementGrid = null;
+    public bool inSimulationMode = false;
+    #endregion
     void Start()
     {
-        this.RefreshSimulationView();
+        this.RefreshCameraSettings();
     }
 
     private void OnDestroy()
@@ -67,19 +81,41 @@ public class UGLMultiScreen : MonoBehaviour
         }
     }
 
-    public float cameraSpacing = 2;
     void ArrangeCameras()
     {
         this.GetArrangementExtents(out var arrangementSize);
-        Vector3 offset = new Vector3(arrangementSize.x - 1, arrangementSize.y - 1, 0) * .5f;
-
-        foreach(var cam in Cameras)
+        Vector3 arrangementCenter = new Vector3(arrangementSize.x - 1, arrangementSize.y - 1, 0) * .5f;
+        if (this.cameraArrangementStyle == CameraArrangementStyle.SimpleGrid)
         {
-            var i = cam.screenNumber;
-            Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - offset;
-            arrangeLocation.y *= -1;
-            cam.transform.localPosition = cameraSpacing * Vector3.Scale(arrangeLocation, new Vector3(1, SUBSCREEN_H_O_W));
+
+            foreach(var cam in Cameras)
+            {
+                var i = cam.screenNumber;
+                Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - arrangementCenter;
+                arrangeLocation.y *= -1;
+                cam.transform.localPosition = cameraSpacing * Vector3.Scale(arrangeLocation, new Vector3(1, SUBSCREEN_H_O_W));
+            }
         }
+        else if (this.cameraArrangementStyle == CameraArrangementStyle.FrankenMonoCam)
+        {
+            float subFov = frankenFieldOfView / Mathf.Max(arrangementSize.x, arrangementSize.y);// * SUBSCREEN_H_O_W;
+            foreach (var cam in Cameras)
+            {
+                cam.camera.fieldOfView = subFov;
+                var i = cam.screenNumber;
+                Vector2 arrangeLocation = this.getArrangementLocation(i);
+                cam.transform.localPosition = Vector3.zero;
+                Vector2 normalizedCoord = Vector2.zero;
+                normalizedCoord = arrangeLocation - (Vector2)arrangementCenter;
+                //rotate to align the the frustums
+                cam.transform.localEulerAngles = new Vector3(
+                    normalizedCoord.y * (subFov + frankenPadding.y), 
+                    normalizedCoord.x * (subFov / SUBSCREEN_H_O_W + frankenPadding.x), 
+                    0);
+                arrangeLocation.y *= -1;
+            }
+        }
+        RefreshCameraSettings();
     }
 
     public UGLSubCamera GetCameraByScreen(int screenIdx)
@@ -96,7 +132,7 @@ public class UGLMultiScreen : MonoBehaviour
     }
 
 
-    public void RefreshSimulationView() => SetSingleScreenSimulationMode(inSimulationMode);
+    public void RefreshCameraSettings() => SetSingleScreenSimulationMode(inSimulationMode);
     void SetSingleScreenSimulationMode(bool enable)
     {
         inSimulationMode = enable;
@@ -220,9 +256,6 @@ public class UGLMultiScreen : MonoBehaviour
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
-
-
             var script = target as UGLMultiScreen;
             bool changed = false;
 
@@ -281,7 +314,16 @@ public class UGLMultiScreen : MonoBehaviour
                 EditorUtility.SetDirty(script.gameObject);
                 PrefabUtility.RecordPrefabInstancePropertyModifications(script);
             }
+
+            base.OnInspectorGUI();
+            //_defaultInspectorFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(_defaultInspectorFoldout, "Default Inspector");
+            //EditorGUILayout.EndFoldoutHeaderGroup();
+            //if (_defaultInspectorFoldout)
+            //{
+            //    base.OnInspectorGUI();
+            //}
         }
+        bool _defaultInspectorFoldout = false;
     }
 #endif
 }
