@@ -49,11 +49,13 @@ public class UGLMultiScreen : MonoBehaviour
     public enum CameraArrangementStyle
     {
         SimpleGrid,
-        FrankenMonoCam,
+        SeamlessOrthographic,
+        PerspectiveFrankenCam,
     }
     public CameraArrangementStyle cameraArrangementStyle = CameraArrangementStyle.SimpleGrid;
-    public float frankenFieldOfView = 60;
-    public Vector3 frankenPadding = new Vector2(0, 0);
+    public float frankenPerspectiveFOV = 60;
+    public Vector3 frankenPerspectivePadding = new Vector2(0, 0);
+    public float frankenOrthographicSize = 5;
 
     #region Serialized, but don't modify Directly
     [Space(15)]
@@ -89,23 +91,36 @@ public class UGLMultiScreen : MonoBehaviour
 
     void ArrangeCameras()
     {
+        bool seamlessOrtho = this.cameraArrangementStyle == CameraArrangementStyle.SeamlessOrthographic;
+
         this.GetArrangementExtents(out var arrangementSize);
         Vector3 arrangementCenter = new Vector3(arrangementSize.x - 1, arrangementSize.y - 1, 0) * .5f;
-        if (this.cameraArrangementStyle == CameraArrangementStyle.SimpleGrid)
+        if (this.cameraArrangementStyle == CameraArrangementStyle.SimpleGrid || seamlessOrtho)
         {
+            Vector3 camSpacing = seamlessOrtho ? 
+                new Vector3(frankenOrthographicSize / SUBSCREEN_H_O_W, frankenOrthographicSize, 1) * 2 / arrangementSize.y
+                : 
+                (new Vector3(1, SUBSCREEN_H_O_W) * cameraSpacing);
 
-            foreach(var cam in Cameras)
+            foreach (var cam in Cameras)
             {
+                cam.camera.orthographic = seamlessOrtho;
+                if (seamlessOrtho)
+                {
+                    cam.camera.orthographicSize = frankenOrthographicSize / arrangementSize.y;
+                }
+
                 var i = cam.screenNumber;
                 Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - arrangementCenter;
                 arrangeLocation.y *= -1;
-                cam.transform.localPosition = cameraSpacing * Vector3.Scale(arrangeLocation, new Vector3(1, SUBSCREEN_H_O_W));
+                cam.transform.localPosition =  Vector3.Scale(arrangeLocation, camSpacing);
                 cam.transform.localRotation = Quaternion.identity;
             }
         }
-        else if (this.cameraArrangementStyle == CameraArrangementStyle.FrankenMonoCam)
+        else if (this.cameraArrangementStyle == CameraArrangementStyle.PerspectiveFrankenCam)
         {
-            float subFov = frankenFieldOfView / Mathf.Max(arrangementSize.x, arrangementSize.y);// * SUBSCREEN_H_O_W;
+
+            float subFov = frankenPerspectiveFOV / Mathf.Max(arrangementSize.x, arrangementSize.y);// * SUBSCREEN_H_O_W;
             foreach (var cam in Cameras)
             {
                 cam.camera.fieldOfView = subFov;
@@ -116,8 +131,8 @@ public class UGLMultiScreen : MonoBehaviour
                 normalizedCoord = arrangeLocation - (Vector2)arrangementCenter;
                 //rotate to align the the frustums
                 cam.transform.localEulerAngles = new Vector3(
-                    normalizedCoord.y * (subFov + frankenPadding.y), 
-                    normalizedCoord.x * (subFov / SUBSCREEN_H_O_W + frankenPadding.x), 
+                    normalizedCoord.y * (subFov + frankenPerspectivePadding.y), 
+                    normalizedCoord.x * (subFov / SUBSCREEN_H_O_W + frankenPerspectivePadding.x), 
                     0);
                 arrangeLocation.y *= -1;
             }
