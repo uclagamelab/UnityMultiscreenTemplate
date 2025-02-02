@@ -64,7 +64,13 @@ public class UGLMultiScreen : MonoBehaviour
     #endregion
     void Start()
     {
+        for (int i = 0; i < Display.displays.Length; i++)
+        {
+            Display.displays[i].Activate(); //Enable the display
+        }
+
         this.RefreshCameraSettings();
+
     }
 
     private void OnDestroy()
