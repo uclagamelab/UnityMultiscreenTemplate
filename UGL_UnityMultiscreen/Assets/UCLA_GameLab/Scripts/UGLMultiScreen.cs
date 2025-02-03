@@ -440,14 +440,13 @@ public class UGLMultiScreen : MonoBehaviour
 
             serializedObject.ApplyModifiedProperties();
 
-            GUILayout.Space(10);
-
-            _defaultInspectorFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(_defaultInspectorFoldout, "Default Inspector");
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            if (_defaultInspectorFoldout)
-            {
-                base.OnInspectorGUI();
-            }
+            //GUILayout.Space(10);
+            //_defaultInspectorFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(_defaultInspectorFoldout, "Default Inspector");
+            //EditorGUILayout.EndFoldoutHeaderGroup();
+            //if (_defaultInspectorFoldout)
+            //{
+            //    base.OnInspectorGUI();
+            //}
         }
         bool _defaultInspectorFoldout = false;
         bool _showArrange = false;
