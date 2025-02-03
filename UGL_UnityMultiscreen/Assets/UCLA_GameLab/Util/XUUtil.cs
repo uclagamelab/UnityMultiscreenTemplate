@@ -1181,8 +1181,13 @@ namespace XUUtils
             return new Vector3(thiss.x, y, thiss.y);
         }
 
-        public static Vector3 asXyVector3(this Vector2 thiss) => thiss.asXyVector3(0);
-        public static Vector3 asXyVector3(this Vector2 thiss, float z)
+
+        public static Vector3 asXyVector3(this Vector2Int thiss, float z = 0)
+        {
+            return new Vector3(thiss.x, thiss.y, z);
+        }
+
+        public static Vector3 asXyVector3(this Vector2 thiss, float z = 0)
         {
             return new Vector3(thiss.x, thiss.y, z);
         }

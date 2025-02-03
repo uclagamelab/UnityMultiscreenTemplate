@@ -157,7 +157,7 @@ public class UGLMultiScreenObject : MonoBehaviour
         {
             if (_intersectingCameras[i])
             {
-                ret = UGLMultiScreen.Current.GetCamera(i);
+                ret = UGLMultiScreen.Current.GetCameraByNumber(i);
                 nIntersectingCameras++;
             }
         }
@@ -170,7 +170,7 @@ public class UGLMultiScreenObject : MonoBehaviour
         {
             if (_intersectingCameras[i])
             {
-                yield return UGLMultiScreen.Current.GetCamera(i);
+                yield return UGLMultiScreen.Current.GetCameraByNumber(i);
             }
         }
     }

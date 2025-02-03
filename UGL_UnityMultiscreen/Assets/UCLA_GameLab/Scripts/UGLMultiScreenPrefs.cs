@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using XUUtils;
 using Unity.VisualScripting;
-using int2 = UGLMultiScreen.int2;
 
 public class UGLMultiScreenPrefs : XUGenericPeristentDataSingleton<UGLMultiScreenPrefs, UGLMultiScreenPrefsData>
 {

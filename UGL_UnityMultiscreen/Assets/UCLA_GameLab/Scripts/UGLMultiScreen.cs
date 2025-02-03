@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-//using Unity.Mathematics;
 using XUUtils;
 using Unity.VisualScripting;
 using NaughtyAttributes;
@@ -98,11 +97,10 @@ public class UGLMultiScreen : MonoBehaviour
 
     void Update()
     {
-        if (!Application.isPlaying)
-        {
-            EditModeUpdate();
-            return;
-        }
+        AutoRefreshSimViewIfNecessary();
+
+        if (!Application.isPlaying) return;
+        
 
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.L))
         {
@@ -111,7 +109,7 @@ public class UGLMultiScreen : MonoBehaviour
     }
 
     Vector2 _lastAppliedResolution;
-    void EditModeUpdate()
+    void AutoRefreshSimViewIfNecessary()
     {
         if (autoRefreshSimulationView && inSimulationMode)
         {
@@ -143,7 +141,7 @@ public class UGLMultiScreen : MonoBehaviour
                     cam.camera.orthographicSize = frankenOrthographicSize / arrangementSize.y;
                 }
 
-                var i = cam.screenNumber;
+                var i = cam.outputDisplayNumber;
                 Vector3 arrangeLocation = this.getArrangementLocation(i).asXyVector3() - arrangementCenter;
                 arrangeLocation.y *= -1;
                 cam.transform.localPosition = Vector3.Scale(arrangeLocation, camSpacing);
@@ -157,7 +155,7 @@ public class UGLMultiScreen : MonoBehaviour
             {
                 cam.camera.orthographic = false;
                 cam.camera.fieldOfView = subFov;
-                var i = cam.screenNumber;
+                var i = cam.outputDisplayNumber;
                 Vector2 arrangeLocation = this.getArrangementLocation(i);
                 cam.transform.localPosition = Vector3.zero;
                 Vector2 normalizedCoord = Vector2.zero;
@@ -173,19 +171,49 @@ public class UGLMultiScreen : MonoBehaviour
         RefreshCameraSettings();
     }
 
-    public UGLSubCamera GetCameraByScreen(int screenIdx)
+    //TODO: untested
+    public UGLSubCamera GetCameraByOutputScreen(int screenIdx)
     {
         foreach (var cam in this.Cameras)
         {
-            if (cam.screenNumber == screenIdx) return cam;
+            if (cam.outputDisplayNumber == screenIdx) return cam;
         }
         return null;
     }
-    public UGLSubCamera GetCamera(int cameraIdx)
+
+    public UGLSubCamera GetCameraByNumber(int cameraNumber)
     {
-        return this.Cameras[cameraIdx];
+        return this.Cameras[cameraNumber];
     }
 
+    public UGLSubCamera GetCameraByArrangementLocation(Vector2Int loc) => GetCameraByArrangementLocation(loc.x, loc.y);
+    public UGLSubCamera GetCameraByArrangementLocation(int x, int y)
+    {
+        foreach(var cam in this.Cameras)
+        {
+           var arrangeLoc = cam.arrangementLocation;
+            if (arrangeLoc.x == x && arrangeLoc.y == y)
+            {
+                return cam;
+            }
+        }
+        return null;
+    }
+
+    public UGLSubCamera GetCameraForScreenPoint(Vector2 screnPoint)
+    {
+        UGLSubCamera chosenCam = null;
+        foreach (var cam in this.Cameras)
+        {
+            Vector3 vpPosition = cam.camera.ScreenToViewportPoint(Input.mousePosition);
+            if (XUUtil.NumberIsBetween(vpPosition.x, 0, 1) && XUUtil.NumberIsBetween(vpPosition.y, 0, 1))
+            {
+                chosenCam = cam;
+                break;
+            }
+        }
+        return chosenCam;
+    }
 
     public void RefreshCameraSettings(bool force = true) => SetSingleScreenSimulationMode(inSimulationMode, force);
     void SetSingleScreenSimulationMode(bool enable, bool force = true)
@@ -237,22 +265,21 @@ public class UGLMultiScreen : MonoBehaviour
             }
             else
             {
-                Vector2 arrangePos = this.getArrangementLocation(cam.screenNumber);
+                Vector2 arrangePos = this.getArrangementLocation(cam.outputDisplayNumber);
                 Vector2 cellPos = new Vector2(arrangePos.x * cellSize.x, (size.y - arrangePos.y - 1) * cellSize.y);
 
                 float tempScale = 1;// .5f;
                 cellPos += centeringOffset;
                 cam.camera.rect = new Rect(cellPos * tempScale, cellSize * tempScale);
-                //cam.camera.pixelRect = new Rect(cellPosPix, cellSizePix);
             }
         }
     }
 
-    public void GetArrangementExtents(out int2 size) => GetArrangementExtents(out var dontCare, out size);
-    public void GetArrangementExtents(out int2 offset, out int2 size)
+    public void GetArrangementExtents(out Vector2Int size) => GetArrangementExtents(out var dontCare, out size);
+    public void GetArrangementExtents(out Vector2Int offset, out Vector2Int size)
     {
-        int2 min = new(N_MONITORS + 1, N_MONITORS + 1);
-        int2 max = new(-1, -1);
+        Vector2Int min = new(N_MONITORS + 1, N_MONITORS + 1);
+        Vector2Int max = new(-1, -1);
 
         for (int yi = 0; yi < N_MONITORS; yi++)
         {
@@ -272,7 +299,7 @@ public class UGLMultiScreen : MonoBehaviour
         size = max - min;
     }
 
-    public Vector2 getArrangementLocation(int screenNumber)
+    public Vector2Int getArrangementLocation(int displayNumber)
     {
         int nFound = 0;
         GetArrangementExtents(out var offset, out var size);
@@ -284,15 +311,15 @@ public class UGLMultiScreen : MonoBehaviour
                 int i = yi * N_MONITORS + xi;
                 if (_arrangementGrid[i])
                 {
-                    if (screenNumber == nFound)
+                    if (displayNumber == nFound)
                     {
-                        return new Vector2(xi - offset.x, yi - offset.y);
+                        return new Vector2Int(xi - offset.x, yi - offset.y);
                     }
                     nFound++;
                 }
             }
         }
-        return new Vector2(-1, -1);
+        return new Vector2Int(-1, -1);
     }
 
     int nAssigned
@@ -304,7 +331,6 @@ public class UGLMultiScreen : MonoBehaviour
             return _nAssigned;
         }
     }
-
 
 
 #if UNITY_EDITOR
@@ -470,18 +496,4 @@ public class UGLMultiScreen : MonoBehaviour
         bool _showArrange = false;
     }
 #endif
-
-    [System.Serializable]
-    public struct int2
-    {
-        public int x; public int y;
-        public int2(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-        public static int2 operator +(int2 a) => a;
-        public static int2 operator -(int2 a) => new int2(-a.x, -a.y);
-        public static int2 operator -(int2 a, int2 b) => new int2(a.x - b.x, a.y - b.y);
-    }
 }

@@ -6,8 +6,21 @@ public class UGLSubCamera : MonoBehaviour
 {
     int overrideScreenIdx = -1;
     public int cameraNumber => this.transform.GetSiblingIndex();
-    
-    public int screenNumber
+
+    UGLMultiScreen _parent;
+    public UGLMultiScreen parent
+    {
+        get
+        {
+            if (_parent == null)
+            {
+                _parent = GetComponentInParent<UGLMultiScreen>();
+            }
+            return _parent;
+        }
+    }
+
+    public int outputDisplayNumber
     {
         get
         {
@@ -26,33 +39,40 @@ public class UGLSubCamera : MonoBehaviour
     [SerializeField] Camera _camera;
     public Camera camera => _camera;
 
+    public Vector2Int arrangementLocation
+    {
+        get
+        {
+            return parent.getArrangementLocation(this.cameraNumber);
+        }
+    }
 
     void Awake()
     {
         //ResetOverrideScreenNumber();
         if (UGLMultiScreenPrefs.Data.screenRemappingOk())
         {
-            this.SetOutputScreen(UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber], false);
+            this.SetOutputDisplay(UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber], false);
         }
     }
 
-    public void ResetOverrideScreenNumber() => SetOutputScreen(-1);
-    public void SetOutputScreen(int screenNumber, bool writeToSaveData = true)
+    public void ResetOverrideScreenNumber() => SetOutputDisplay(-1);
+    public void SetOutputDisplay(int displayNumber, bool writeToSaveData = true)
     {
         if (!Application.isPlaying)
         {
-            Debug.LogError($"'{nameof(SetOutputScreen)}' is playmode only");
+            Debug.LogError($"'{nameof(SetOutputDisplay)}' is playmode only");
             return;
         }
 
-        this.screenNumber = screenNumber;
-        this.camera.targetDisplay = UGLMultiScreen.Current.inSimulationMode ? 0 : this.screenNumber;
+        this.outputDisplayNumber = displayNumber;
+        this.camera.targetDisplay = parent.inSimulationMode ? 0 : this.outputDisplayNumber;
 
 
         if (writeToSaveData) 
         try
         {
-            UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber] = screenNumber;
+            UGLMultiScreenPrefs.Data.screenRemapping[this.cameraNumber] = displayNumber;
             UGLMultiScreenPrefs.SaveAll();
         }
         catch (Exception e)
@@ -63,7 +83,7 @@ public class UGLSubCamera : MonoBehaviour
 
     internal void setSimulationMode(bool inSimulationMode)
     {
-        camera.targetDisplay = inSimulationMode ? 0 : screenNumber;
+        camera.targetDisplay = inSimulationMode ? 0 : outputDisplayNumber;
     }
 
     int lastPlaneCalcFrame = -1;
@@ -92,7 +112,7 @@ public class UGLSubCamera : MonoBehaviour
             base.OnInspectorGUI();
 
             var script = target as UGLSubCamera;
-            GUILayout.Label($"SCREEN: {script.screenNumber}");
+            GUILayout.Label($"SCREEN: {script.outputDisplayNumber}");
             //GUILayout.Label($"GAME: {script.}");
         }
     }
