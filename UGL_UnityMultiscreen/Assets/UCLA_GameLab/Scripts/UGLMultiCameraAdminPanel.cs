@@ -13,6 +13,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     [SerializeField] TMPro.TMP_Dropdown _screenGameViewDropdown;
     [SerializeField] TMPro.TextMeshProUGUI _screenNumberText;
     [SerializeField] TMPro.TextMeshProUGUI _arrangementLocText;
+    [SerializeField] UnityEngine.UI.Button _resetCameraAssignments;
     UGLSubCamera _camera;
     UGLSubCamera camera
     {
@@ -54,6 +55,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
         ignoreDropdownChanges = true;
         Refresh();
         ignoreDropdownChanges = false;
+        _resetCameraAssignments.onClick.AddListener(BTN_ResetCameraAssignments);
     }
 
     private void OnDropDownChange(int gameView)
@@ -81,6 +83,16 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
         {
             UGLMultiScreen.Current.RefreshCameraSettings();
         }
+    }
+
+    void BTN_ResetCameraAssignments()
+    {
+        foreach (var cam in UGLMultiScreen.Current.Cameras)
+        {
+            //TODO: this should be a dedicated method.
+            cam.SetOutputDisplay(cam.cameraNumber);
+        }
+        UGLMultiScreen.Current.RefreshCameraSettings(true);
     }
 
     [ContextMenu("Force Refresh")]
