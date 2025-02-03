@@ -1,13 +1,26 @@
 using UnityEngine;
 using TMPro;
-public class MultiScreenObjectDebugger : MonoBehaviour
+using System;
+public class MultiScreenObjectScriptExample : MonoBehaviour
 {
     [SerializeField] UGLMultiScreenObject _mso;
     [SerializeField] TextMeshPro _textMeshPro;
     void Awake()
     {
+        _mso.OnEnterCameraChange += OnCameraChange;
     }
 
+    private void OnCameraChange(UGLMultiScreenObject.EnterChangeInfo info)
+    {
+        if (info.entered) 
+        {
+            Debug.Log("entered camera " + info.camera.cameraNumber);
+        }
+        else //exited
+        {
+            Debug.Log("exited camera " + info.camera.cameraNumber);
+        }
+    }
 
     void Update()
     {
