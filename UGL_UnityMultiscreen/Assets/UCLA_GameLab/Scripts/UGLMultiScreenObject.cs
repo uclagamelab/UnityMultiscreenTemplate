@@ -1,10 +1,10 @@
 using UnityEditor;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine;
 using XUUtils;
 using UnityEngine.Events;
 
+[RequireComponent(typeof(UGLMultiScreenObjectEvents))]
 public class UGLMultiScreenObject : MonoBehaviour
 {
     bool[] _intersectingCamerasPrev = new bool[8];
