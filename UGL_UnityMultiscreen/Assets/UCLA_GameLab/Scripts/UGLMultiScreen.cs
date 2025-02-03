@@ -142,7 +142,6 @@ public class UGLMultiScreen : MonoBehaviour
         }
         else if (this.cameraArrangementStyle == CameraArrangementStyle.PerspectiveFrankenCam)
         {
-
             float subFov = frankenPerspectiveFOV / Mathf.Max(arrangementSize.x, arrangementSize.y);// * SUBSCREEN_H_O_W;
             foreach (var cam in Cameras)
             {
