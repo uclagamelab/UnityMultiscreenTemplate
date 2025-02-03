@@ -5,6 +5,7 @@ public class MultiScreenObjectScriptExample : MonoBehaviour
 {
     [SerializeField] UGLMultiScreenObject _mso;
     [SerializeField] TextMeshPro _textMeshPro;
+
     void Awake()
     {
         _mso.OnEnterCameraChange += OnCameraChange;
@@ -14,11 +15,11 @@ public class MultiScreenObjectScriptExample : MonoBehaviour
     {
         if (info.entered) 
         {
-            Debug.Log("entered camera " + info.camera.cameraNumber);
+            Debug.Log("entered camera " + info.camera.cameraNumber, this);
         }
         else //exited
         {
-            Debug.Log("exited camera " + info.camera.cameraNumber);
+            Debug.Log("exited camera " + info.camera.cameraNumber, this);
         }
     }
 
