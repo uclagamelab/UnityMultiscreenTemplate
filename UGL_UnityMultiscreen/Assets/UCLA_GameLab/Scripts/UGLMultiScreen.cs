@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using NaughtyAttributes;
 using NaughtyAttributes.Editor;
 
+[ExecuteInEditMode]
 public class UGLMultiScreen : MonoBehaviour
 {
     static UGLMultiScreen _I;
@@ -45,13 +46,16 @@ public class UGLMultiScreen : MonoBehaviour
         }
     }
 
+
+    [ShowIf("false")]
+    public bool autoRefreshSimulationView = false;
+
     public enum CameraArrangementStyle
     {
         SimpleGrid,
         SeamlessOrthographic,
         PerspectiveFrankenCam,
     }
-
     [ShowIf("false")]
     public CameraArrangementStyle cameraArrangementStyle = CameraArrangementStyle.SimpleGrid;
 
@@ -106,14 +110,20 @@ public class UGLMultiScreen : MonoBehaviour
         }
     }
 
-    Vector2Int _lastAppliedResolution;
+    Vector2 _lastAppliedResolution;
     void EditModeUpdate()
     {
-
+        if (autoRefreshSimulationView && inSimulationMode)
+        {
+            RefreshCameraSettings(false);
+        }
     }
 
     void PositionCameras()
     {
+        #if UNITY_EDITOR
+        UnityEditor.Undo.RegisterFullObjectHierarchyUndo(this.gameObject, "Auto Position Cameras");
+        #endif
         bool seamlessOrtho = this.cameraArrangementStyle == CameraArrangementStyle.SeamlessOrthographic;
 
         this.GetArrangementExtents(out var arrangementSize);
@@ -177,8 +187,8 @@ public class UGLMultiScreen : MonoBehaviour
     }
 
 
-    public void RefreshCameraSettings() => SetSingleScreenSimulationMode(inSimulationMode);
-    void SetSingleScreenSimulationMode(bool enable)
+    public void RefreshCameraSettings(bool force = true) => SetSingleScreenSimulationMode(inSimulationMode, force);
+    void SetSingleScreenSimulationMode(bool enable, bool force = true)
     {
         inSimulationMode = enable;
         this.GetArrangementExtents(out var offset, out var size);
@@ -191,6 +201,11 @@ public class UGLMultiScreen : MonoBehaviour
             gameViewSize.y = gameViewSizeY;
         }
 #endif
+        if (gameViewSize == _lastAppliedResolution && !force)
+        {
+            return;
+        }
+        _lastAppliedResolution = gameViewSize;
 
         float screenHoW = gameViewSize.y / gameViewSize.x;
 
@@ -297,28 +312,16 @@ public class UGLMultiScreen : MonoBehaviour
     [CustomEditor(typeof(UGLMultiScreen))]
     public class Ed : NaughtyInspector
     {
-        Dictionary<string, SerializedProperty> _serializedProps;
+        Dictionary<string, SerializedProperty> _serializedProps = new();
 
-        protected override void OnEnable()
+        void ezDrawSerializedProperty(string name)
         {
-            base.OnEnable();
-            _serializedProps = new Dictionary<string, SerializedProperty>();
-            addProp(nameof(UGLMultiScreen.frankenOrthographicSize));
-            addProp(nameof(UGLMultiScreen.frankenPerspectivePadding));
-            addProp(nameof(UGLMultiScreen.frankenPerspectiveFOV));
-            addProp(nameof(UGLMultiScreen.simpleGridCameraSpacing));
-            addProp(nameof(UGLMultiScreen.cameraArrangementStyle));
-            addProp(nameof(UGLMultiScreen.frankenOrthographicPadding));
-        }
+            if (!_serializedProps.TryGetValue(name, out var prop))
+            {
+                prop = serializedObject.FindProperty(name);
+                _serializedProps[name] = prop;
+            }
 
-        void addProp(string name)
-        {
-            _serializedProps[name] = serializedObject.FindProperty(name);
-        }
-
-        void drawProp(string name)
-        {
-            var prop = _serializedProps.GetOrDefault(name, null);
             if (prop == null)
             {
                 GUILayout.Label($"Couldn't find property '{name}'");
@@ -335,16 +338,22 @@ public class UGLMultiScreen : MonoBehaviour
             var script = target as UGLMultiScreen;
             bool changed = false;
 
+            drawScreenSimulationSection(ref changed);
+
             GUILayout.Space(10);
+
+            
+
             GUILayout.BeginHorizontal();
+            
             GUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
+            GUILayout.EndVertical();
 
+     
 
-            GUILayout.Label("Screen Arangement");
-
-
-            GUILayout.Label($"{script.nAssigned}/{N_MONITORS}");
-
+            GUILayout.BeginVertical(GUILayout.Width(160));
+            GUILayout.Label($"Screen Arangement ({script.nAssigned}/{N_MONITORS})");
             for (int yi = 0; yi < N_MONITORS; yi++)
             {
                 GUILayout.BeginHorizontal();
@@ -353,10 +362,16 @@ public class UGLMultiScreen : MonoBehaviour
                     int idx = yi * N_MONITORS + xi;
                     var curVal = script.arrangementGrid[idx];
                     var nuVal = GUILayout.Toggle(curVal, "", GUILayout.Width(15));
+                    
+
                     if (nuVal != curVal)
                     {
-                        script.arrangementGrid[idx] = nuVal;
-                        changed = true;
+                        bool okToTurnOn = !nuVal || script.nAssigned + 1 <= N_MONITORS;
+                        if (okToTurnOn)
+                        {
+                            script.arrangementGrid[idx] = nuVal;
+                            changed = true;
+                        }
                     }
                 }
                 GUILayout.EndHorizontal();
@@ -365,37 +380,12 @@ public class UGLMultiScreen : MonoBehaviour
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical();
-            GUILayout.Label("   Single Screen Simulation");
-            GUILayout.BeginHorizontal();
-            GUI.enabled = !script.inSimulationMode;
-            if (GUILayout.Button("ON"))
-            {
-                script.SetSingleScreenSimulationMode(true);
-                changed = true;
-            }
-            GUI.enabled = script.inSimulationMode;
-            if (GUILayout.Button("OFF"))
-            {
-                script.SetSingleScreenSimulationMode(false);
-                changed = true;
-            }
-            GUI.enabled = true;
-            GUILayout.EndHorizontal();
-
-            if (GUILayout.Button("Refresh Simulation View"))
-            {
-                script.SetSingleScreenSimulationMode(script.inSimulationMode);
-                changed = true;
-            }
-
             GUILayout.FlexibleSpace();
-
-
-
-            GUILayout.FlexibleSpace();
-
             GUILayout.EndVertical();
+
             GUILayout.EndHorizontal();
+
+       
 
             GUILayout.Space(10);
 
@@ -404,20 +394,20 @@ public class UGLMultiScreen : MonoBehaviour
             if (_showArrange)
             {
 
-                drawProp(nameof(UGLMultiScreen.cameraArrangementStyle));
+                ezDrawSerializedProperty(nameof(UGLMultiScreen.cameraArrangementStyle));
                 if (script.cameraArrangementStyle == CameraArrangementStyle.SimpleGrid)
                 {
-                    drawProp(nameof(UGLMultiScreen.simpleGridCameraSpacing));
+                    ezDrawSerializedProperty(nameof(UGLMultiScreen.simpleGridCameraSpacing));
                 }
                 else if (script.cameraArrangementStyle == CameraArrangementStyle.PerspectiveFrankenCam)
                 {
-                    drawProp(nameof(UGLMultiScreen.frankenPerspectiveFOV));
-                    drawProp(nameof(UGLMultiScreen.frankenPerspectivePadding));
+                    ezDrawSerializedProperty(nameof(UGLMultiScreen.frankenPerspectiveFOV));
+                    ezDrawSerializedProperty(nameof(UGLMultiScreen.frankenPerspectivePadding));
                 }
                 else if (script.cameraArrangementStyle == CameraArrangementStyle.SeamlessOrthographic)
                 {
-                    drawProp(nameof(UGLMultiScreen.frankenOrthographicSize));
-                    drawProp(nameof(UGLMultiScreen.frankenOrthographicPadding));
+                    ezDrawSerializedProperty(nameof(UGLMultiScreen.frankenOrthographicSize));
+                    ezDrawSerializedProperty(nameof(UGLMultiScreen.frankenOrthographicPadding));
                 }
 
                 GUILayout.BeginHorizontal();
@@ -446,6 +436,35 @@ public class UGLMultiScreen : MonoBehaviour
             //{
             //    base.OnInspectorGUI();
             //}
+        }
+
+        void drawScreenSimulationSection(ref bool changed)
+        {
+            
+            var script = target as UGLMultiScreen;
+            GUILayout.Label("   Single Screen Simulation");
+            GUILayout.BeginHorizontal();
+            GUI.enabled = !script.inSimulationMode;
+            if (GUILayout.Button("ON"))
+            {
+                script.SetSingleScreenSimulationMode(true);
+                changed = true;
+            }
+            GUI.enabled = script.inSimulationMode;
+            if (GUILayout.Button("OFF"))
+            {
+                script.SetSingleScreenSimulationMode(false);
+                changed = true;
+            }
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("Refresh Simulation View"))
+            {
+                script.SetSingleScreenSimulationMode(script.inSimulationMode);
+                changed = true;
+            }
+            ezDrawSerializedProperty(nameof(UGLMultiScreen.autoRefreshSimulationView));
         }
         bool _defaultInspectorFoldout = false;
         bool _showArrange = false;
