@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
-using Unity.Mathematics;
+//using Unity.Mathematics;
 using XUUtils;
 using Unity.VisualScripting;
 using NaughtyAttributes;
@@ -470,4 +470,18 @@ public class UGLMultiScreen : MonoBehaviour
         bool _showArrange = false;
     }
 #endif
+
+    [System.Serializable]
+    public struct int2
+    {
+        public int x; public int y;
+        public int2(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+        public static int2 operator +(int2 a) => a;
+        public static int2 operator -(int2 a) => new int2(-a.x, -a.y);
+        public static int2 operator -(int2 a, int2 b) => new int2(a.x - b.x, a.y - b.y);
+    }
 }

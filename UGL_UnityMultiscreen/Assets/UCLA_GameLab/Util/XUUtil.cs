@@ -2143,8 +2143,13 @@ namespace XUUtils
 
         public static void Stop(this Rigidbody rb)
         {
+            #if UNITY_6000_0_OR_NEWER
             rb.linearVelocity *= 0;
             rb.angularVelocity *= 0;
+            #else
+            rb.velocity *= 0;
+            rb.angularVelocity *= 0;
+            #endif
         }
 
         public static Bounds GetBounds(this Collider[] colliders)
@@ -2840,7 +2845,7 @@ namespace XUUtils
                 xxquaternion composite = dir_rotation * twist_rotation;
                 composite -= orientation;
             ASSERT(composite.magnitude() < 0.00001f );
-            #endif //_DEBUG */
+#endif //_DEBUG */
         }
 
         public static void EnforceComponentReferenceType<T>(ref Component toAssign) where T : class
