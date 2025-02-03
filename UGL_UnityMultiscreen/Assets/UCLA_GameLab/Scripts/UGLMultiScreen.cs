@@ -94,7 +94,7 @@ public class UGLMultiScreen : MonoBehaviour
 
     void Update()
     {
-        if (Application.isPlaying)
+        if (!Application.isPlaying)
         {
             EditModeUpdate();
             return;
