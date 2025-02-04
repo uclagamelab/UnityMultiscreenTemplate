@@ -65,8 +65,8 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
         var desiredGameView = UGLMultiScreen.Current.GetCameraByNumber(gameView);
         var desiredViewCurrentOutput = desiredGameView.outputDisplayNumber;
         var currentCamScreenNumber = _camera.outputDisplayNumber;
-        _camera.SetOutputDisplay(desiredViewCurrentOutput);
-        desiredGameView.SetOutputDisplay(currentCamScreenNumber);
+        _camera.SetOutputDisplay(desiredViewCurrentOutput, true);
+        desiredGameView.SetOutputDisplay(currentCamScreenNumber, true);
         RefreshAll();
     }
 
@@ -90,7 +90,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
         foreach (var cam in UGLMultiScreen.Current.Cameras)
         {
             //TODO: this should be a dedicated method.
-            cam.SetOutputDisplay(cam.cameraNumber);
+            cam.SetOutputDisplay(cam.cameraNumber, true);
         }
         UGLMultiScreen.Current.RefreshCameraSettings(true);
     }

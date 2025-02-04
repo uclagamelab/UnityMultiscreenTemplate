@@ -56,8 +56,9 @@ public class UGLSubCamera : MonoBehaviour
         }
     }
 
-    public void ResetOverrideScreenNumber() => SetOutputDisplay(-1);
-    public void SetOutputDisplay(int displayNumber, bool writeToSaveData = true)
+    public void ResetOverrideScreenNumber() => SetOutputDisplay(-1, true);
+
+    public void SetOutputDisplay(int displayNumber, bool writeToSaveData = false)
     {
         if (!Application.isPlaying)
         {
