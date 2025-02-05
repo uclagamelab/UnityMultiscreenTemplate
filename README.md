@@ -22,15 +22,8 @@ Use Unity 6, or Unity 2022.3
 
 ## Installation
 
-#### Option 1 (recommended):
-
-You can download the Unity package [here](https://drive.google.com/file/d/1-_6geIsqZwJgo52MSaDoZEjJEIqEZIzb/view?usp=drive_link)
-
-#### Option 2:
-
-Download/clone the git repository \
-[https://github.com/uclagamelab/UnityMultiscreenTemplate](https://github.com/uclagamelab/UnityMultiscreenTemplate)
-
+Unity package [here](https://drive.google.com/file/d/1-_6geIsqZwJgo52MSaDoZEjJEIqEZIzb/view?usp=drive_link)
+(Or download this repository)
 
 ## Example Scenes
 
