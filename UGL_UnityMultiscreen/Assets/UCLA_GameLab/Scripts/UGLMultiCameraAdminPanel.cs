@@ -43,6 +43,10 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
             foreach (UGLMultiScreenAdminPanel panel in all)
             {
                 panel.canvas.gameObject.SetActive(_AdminPanelsOpen);
+                if (_AdminPanelsOpen)
+                {
+                    panel.Refresh();
+                }
             }
         }
     }
@@ -93,6 +97,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
             cam.SetOutputDisplay(cam.cameraNumber, true);
         }
         UGLMultiScreen.Current.RefreshCameraSettings(true);
+        RefreshAll();
     }
 
     [ContextMenu("Force Refresh")]
