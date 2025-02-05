@@ -1,0 +1,2 @@
+* Write some documentation
+* Write some cursor code (do raycasts, detect what screen cursor is in)
