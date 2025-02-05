@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using XUUtils;
 using Unity.VisualScripting;
 using NaughtyAttributes;
+#if UNITY_EDITOR
 using NaughtyAttributes.Editor;
+#endif
 
 [ExecuteInEditMode]
 public class UGLMultiScreen : MonoBehaviour
