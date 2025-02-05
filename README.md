@@ -2,7 +2,7 @@
 
 ## Overview
 
-The following library was made to ease some of the not-fun parts of developing multi-monitor projects in Unity.
+The following library was made to ease some of the not-fun parts of developing multi-monitor projects in Unity for a multi-monitor themed game jam.
 
 ![Enter image alt description](Images/0gN_Image_1.gif)
 
@@ -262,7 +262,7 @@ From this, you can access various info, and such as a list of all the UGLSubCame
 In particular, if you are interested screen based raycasts, please reference *MultiScreenMouseExample.cs*[^2] 
 Each UGLSubCamera exposes information, including its current output display, its position in the 2D camera arrangement (the grid of checkboxes).
 
-*NOTE: If you want to dynamically rearrange the cameras at runtime as part of a game mechanic, this can be tentatively done as below, but this functionality is not fully implemented yet. Please let the instructor know if this is a feature you need.*
+*NOTE: If you want to dynamically rearrange the cameras at runtime as part of a game mechanic, this can be tentatively done as below, but its functionality is not guaranteed.
 
 ```
 UGLSubCamera.SetOutputDisplay(int displayNumber);	
