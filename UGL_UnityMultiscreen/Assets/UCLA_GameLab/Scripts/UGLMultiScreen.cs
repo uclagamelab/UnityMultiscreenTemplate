@@ -202,14 +202,29 @@ public class UGLMultiScreen : MonoBehaviour
         return null;
     }
 
-    public UGLSubCamera GetCameraForScreenPoint(Vector2 screnPoint)
+    public UGLSubCamera GetCameraForMousePosition(Vector2 mousePosition, out Vector3 screenPosition)//, out int displayNumber)
     {
+        int displayNumber = -1;
+        screenPosition = mousePosition;
+        if (!inSimulationMode)
+        {
+            Vector3 relativeMouseAndDisplay = Display.RelativeMouseAt(mousePosition);
+            if (relativeMouseAndDisplay != Vector3.zero)
+            {
+               
+                displayNumber = (int)relativeMouseAndDisplay.z ;
+                screenPosition = relativeMouseAndDisplay.withZ(0);
+                return GetCameraByOutputScreen(displayNumber);
+            }
+        }
+
         UGLSubCamera chosenCam = null;
         foreach (var cam in this.Cameras)
         {
             Vector3 vpPosition = cam.camera.ScreenToViewportPoint(Input.mousePosition);
             if (XUUtil.NumberIsBetween(vpPosition.x, 0, 1) && XUUtil.NumberIsBetween(vpPosition.y, 0, 1))
             {
+   
                 chosenCam = cam;
                 break;
             }
@@ -498,4 +513,27 @@ public class UGLMultiScreen : MonoBehaviour
         bool _showArrange = false;
     }
 #endif
+
+    //private void OnGUI()
+    //{
+    //    if (!Application.isPlaying)
+    //    {
+    //        return;
+    //    }
+
+    //    var cam = UGLMultiScreen.Current.GetCameraForMousePosition(Input.mousePosition, out var screenPosFixed, out var display);
+    //    var pos = screenPosFixed;// Input.mousePosition;
+        
+    //    if (display >= 0)
+    //    {
+    //        pos.y = Display.displays[display].renderingHeight - pos.y;
+    //    }
+    //    else
+    //    {
+    //        pos.y = Screen.height - pos.y;
+    //    }
+    //    GUI.Button(new Rect(pos, new Vector2(220,80)), $"\nfixed:{screenPosFixed}" +
+    //        $"\ncam-disp:{(cam == null ? -1 : cam.outputDisplayNumber)}" +
+    //        $"\ndisplay: {display}");
+    //}
 }

@@ -9,13 +9,14 @@ public class MultiScreenMouseExample : MonoBehaviour
 
     void Update()
     {
-        UGLSubCamera subCamera = UGLMultiScreen.Current.GetCameraForScreenPoint(Input.mousePosition);
+        Vector3 fixedMousePosition = Input.mousePosition;
+        UGLSubCamera subCamera = UGLMultiScreen.Current.GetCameraForMousePosition(Input.mousePosition, out fixedMousePosition);
 
         if (subCamera != null)
         {
             //position the cursor
-            var ray = subCamera.camera.ScreenPointToRay(Input.mousePosition);
-            Vector3 mousePositionModifiedZ = Input.mousePosition;
+            var ray = subCamera.camera.ScreenPointToRay(fixedMousePosition);
+            Vector3 mousePositionModifiedZ = fixedMousePosition;
             mousePositionModifiedZ.z = _cusorDistFromCam;
             var cursorWorldPos = subCamera.camera.ScreenToWorldPoint(mousePositionModifiedZ);
             this.transform.position = cursorWorldPos;
