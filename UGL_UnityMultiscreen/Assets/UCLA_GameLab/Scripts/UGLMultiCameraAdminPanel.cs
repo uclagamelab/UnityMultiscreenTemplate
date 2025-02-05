@@ -99,7 +99,7 @@ public class UGLMultiScreenAdminPanel : MonoBehaviour
     void Refresh()
     {
         var arrangeLoc = camera.arrangementLocation;
-        _screenNumberText.text = $"Display {displayNumber+1}";
+        _screenNumberText.text = $"Display {displayNumber}";
         _arrangementLocText.text = $"<size=16>arrangement Location</size>\n({arrangeLoc.x},{arrangeLoc.y})";
         _screenGameViewDropdown.value = this.camera.cameraNumber;
     }
