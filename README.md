@@ -5,6 +5,7 @@
 The following library was made to ease some of the not-fun parts of developing multi-monitor projects in Unity for a multi-monitor themed game jam.
 
 ![Enter image alt description](Images/0gN_Image_1.gif)
+![Enter image alt description](Images/simulator_on.gif)
 
 Features include:
 
