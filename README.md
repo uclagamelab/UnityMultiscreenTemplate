@@ -40,7 +40,7 @@ Uses some of the advanced coding to log specific enter and exit information to t
 
 You can see the scripts and setup on ‘*EXAMPLE_OBJECT/Sphere’*
 
-![Enter image alt description](Images/Q60_Image_3.png)
+<center>![Enter image alt description](Images/Q60_Image_3.png)</center>
 
 #### MultiScreenExample_6x1
 
@@ -54,26 +54,27 @@ Cameras arranged into 6x1 box, arranged as a perspective franken-camera.
 
 ## Quick Start
 
-1. Create a new Unity project (or make a new Scene in an existing project). Download and add the [UGL Multiscreen Unity package](https://drive.google.com/file/d/1-_6geIsqZwJgo52MSaDoZEjJEIqEZIzb/view?usp=drive_link) using the instructions found [here](https://docs.unity3d.com/6000.0/Documentation/Manual/AssetPackagesImport.html): Assets > Import Package > Custom Package… \
-
+1. Create a new Unity project (or make a new Scene in an existing project). Download and add the [UGL Multiscreen Unity package](https://drive.google.com/file/d/1-_6geIsqZwJgo52MSaDoZEjJEIqEZIzb/view?usp=drive_link) using the instructions found [here](https://docs.unity3d.com/6000.0/Documentation/Manual/AssetPackagesImport.html): Assets > Import Package > Custom Package…
 
 2. Delete the default Main Camera.
 
+3. Add ‘UCLA_GameLab/Prefabs/UGLMultiScreen’ prefab to your scene.
 ![Enter image alt description](Images/rPa_Image_5.png)
 *The children of this object are your game view cameras that output to each display in the final build.  These can be moved, have components added freely according to the needs of you project.*
 
-4. Set your display arrangement, and position your cameras ([details](?tab=t.0#bookmark=id.j9zl0m3stz8h)) \
- \
-**You can skip this at first, and use the default 3x2 display arrangement. \
- \
-*You might also want to add a large model or texture that is visible across all the cameras to get a better sense of your arrangement. \
-*
+4. Set your display arrangement, and position your cameras ([details](?tab=t.0#bookmark=id.j9zl0m3stz8h)) 
+**You can skip this at first, and use the default 3x2 display arrangement. 
+*You might also want to add a large model or texture that is visible across all the cameras to get a better sense of your arrangement.
 
-![Enter image alt description](Images/UpN_Image_6.gif)
+5.  If your Gameview looks funny or squished, hit the ‘Refresh Simulation View’ button.
+![Hit the 'Refresh Simulation View' to fix the game view](Images/UpN_Image_6.gif)
 
+6. IMPORTANT: When you are ready to make build, turn off simulation mode on the UGLMultiScreen prefab
 ![Enter image alt description](Images/c43_Image_7.png)
 
-![Enter image alt description](Images/VlX_Image_8.gif)
+7. If the cameras appear out of order in the build, press [CTRL+L], to open the admin panel, and use the drop down to rearrange the screens.
+<!-- ![Enter image alt description](Images/VlX_Image_8.gif) -->
+<img src="Images/VlX_Image_8.gif" alt="A multi-screen game" width="450"></img>
 
 ## Single Screen Simulation Mode
 
