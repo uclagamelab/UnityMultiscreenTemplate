@@ -72,7 +72,7 @@ public class UGLMultiScreen : MonoBehaviour
 
     #region Camera Positioning Settings
     [ShowIf("false")]
-    public float simpleGridCameraSpacing = 2;
+    public Vector2 simpleGridCameraSpacing = new(2,2);
     [ShowIf("false")]
     public float frankenPerspectiveFOV = 60;
     [ShowIf("false")]
@@ -143,7 +143,7 @@ public class UGLMultiScreen : MonoBehaviour
             Vector3 camSpacing = seamlessOrtho ?
                 new Vector3(frankenOrthographicSize / SUBSCREEN_H_O_W + frankenOrthographicPadding.x, frankenOrthographicSize + frankenOrthographicPadding.y, 1) * 2 / arrangementSize.y
                 :
-                (new Vector3(1, SUBSCREEN_H_O_W) * simpleGridCameraSpacing);
+                simpleGridCameraSpacing;
 
             foreach (var cam in Cameras)
             {

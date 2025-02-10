@@ -35,6 +35,6 @@ public class MultiScreenObjectScriptExample : MonoBehaviour
             text += $"{cam.cameraNumber}";
         }
         _textMeshPro.text = $"all visible: ({text})";
-        _textMeshPro.text += $"\nlast entered:{_mso.lastEnteredCamera}";
+        _textMeshPro.text += $"\nlast entered:{_mso.lastEnteredCamera.arrangementLocation}";
     }
 }
