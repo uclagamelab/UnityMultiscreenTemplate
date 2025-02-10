@@ -12,7 +12,7 @@ public class UGLMultiScreenObject : MonoBehaviour
     //int lastEnteredCam = -1;
     public bool isVisibleToAnyCamera { get; private set; } = false;
     public Renderer mainRenderer;
-    List<int> _visibilityStack = new List<int>(8);
+    List<UGLSubCamera> _visibilityStack = new List<UGLSubCamera>(8);
     int _lastCalcTime = -1;
 
     //public delegate void OnEnterCameraChangeDelegate(UGLSubCamera camera, bool entered);
@@ -44,12 +44,21 @@ public class UGLMultiScreenObject : MonoBehaviour
     /// <summary>
     /// The camera that the object most recently entered.
     /// </summary>
-    public int lastEnteredCamera => _visibilityStack.GetOrDefault(_visibilityStack.Count - 1, lastVisibleCamera);
-    public int lastVisibleCamera
+    public UGLSubCamera lastEnteredCamera => _visibilityStack.GetOrDefault(_visibilityStack.Count - 1, lastVisibleCamera);
+    public UGLSubCamera lastVisibleCamera
     {
         get;
         private set;
     }
+
+    //public Vector2Int GetPositionInArrangement()
+    //{
+    //    if (lastEnteredCamera == -1) return new Vector2Int(-1,-1);
+    //    else
+    //    {
+    //        return UGLMultiScreen.Current.GetCameraByNumber(lastEnteredCamera).arrangementLocation;
+    //    }
+    //}
 
     Bounds worldBounds => mainRenderer != null ? mainRenderer.bounds : new Bounds(this.transform.position, Vector3.one);
 
@@ -80,8 +89,8 @@ public class UGLMultiScreenObject : MonoBehaviour
         isVisibleToAnyCamera = false;
         foreach (var cam in UGLMultiScreen.Current.Cameras)
         {
-            var camNumber = cam.cameraNumber;
-            var prevVisible = _intersectingCameras[camNumber];
+            //var camNumber = cam.cameraNumber;
+            var prevVisible = _intersectingCameras[cam.cameraNumber];
             var nowVisible = cam.IsInView(worldBounds);
 
             isVisibleToAnyCamera |= nowVisible;
@@ -89,21 +98,21 @@ public class UGLMultiScreenObject : MonoBehaviour
             if (prevVisible != nowVisible)
             {
 
-                _intersectingCameras[camNumber] = nowVisible;
+                _intersectingCameras[cam.cameraNumber] = nowVisible;
 
-                if (_visibilityStack.Contains(camNumber))
+                if (_visibilityStack.Contains(cam))
                 {
-                    _visibilityStack.Remove(camNumber);
+                    _visibilityStack.Remove(cam);
                     if (_visibilityStack.Count == 0)
                     {
-                        lastVisibleCamera = camNumber;
+                        lastVisibleCamera = cam;
                     }
                 }
 
                 if (nowVisible)
                 {
-                    lastVisibleCamera = camNumber;
-                    _visibilityStack.Add(camNumber);
+                    lastVisibleCamera = cam;
+                    _visibilityStack.Add(cam);
                 }
 
                 if (doCallbacks)

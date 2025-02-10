@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using XUUtils;
 using Unity.VisualScripting;
 using NaughtyAttributes;
+using UnityEngine.Serialization;
+
 #if UNITY_EDITOR
 using NaughtyAttributes.Editor;
 #endif
@@ -23,8 +25,14 @@ public class UGLMultiScreen : MonoBehaviour
 
     const int N_MONITORS = 6;
 
-    static readonly Vector2 SUBSCREEN_ASPECT_RATIO_VEC = new Vector2(4, 3);
-    const float SUBSCREEN_H_O_W = 3f / 4f; //Height over width (aspect ratio of monitors)
+    //const float SUBSCREEN_H_O_W = 3f / 4f; //Height over width (aspect ratio of monitors)
+    public Vector2 aspectRatio = new(16, 9);
+    float SUBSCREEN_H_O_W => aspectRatio.y / aspectRatio.x; //Height over width (aspect ratio of monitors)
+
+    public List<UGLSubCamera> Cameras
+    {
+        get => _Cameras;
+    }
 
     public bool[] arrangementGrid
     {
@@ -78,7 +86,9 @@ public class UGLMultiScreen : MonoBehaviour
     #region Serialized, but don't modify Directly
     [Space(15)]
     [Header("--- Don't Edit Below ---")]
-    public List<UGLSubCamera> Cameras = new();
+    [FormerlySerializedAs("Cameras")]
+    [SerializeField] List<UGLSubCamera> _Cameras = new();
+
     [SerializeField] bool[] _arrangementGrid = null;
     public bool inSimulationMode = false;
     #endregion
@@ -102,7 +112,7 @@ public class UGLMultiScreen : MonoBehaviour
         AutoRefreshSimViewIfNecessary();
 
         if (!Application.isPlaying) return;
-        
+
 
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) && Input.GetKeyDown(KeyCode.L))
         {
@@ -121,9 +131,9 @@ public class UGLMultiScreen : MonoBehaviour
 
     void PositionCameras()
     {
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         UnityEditor.Undo.RegisterFullObjectHierarchyUndo(this.gameObject, "Auto Position Cameras");
-        #endif
+#endif
         bool seamlessOrtho = this.cameraArrangementStyle == CameraArrangementStyle.SeamlessOrthographic;
 
         this.GetArrangementExtents(out var arrangementSize);
@@ -191,9 +201,9 @@ public class UGLMultiScreen : MonoBehaviour
     public UGLSubCamera GetCameraByArrangementLocation(Vector2Int loc) => GetCameraByArrangementLocation(loc.x, loc.y);
     public UGLSubCamera GetCameraByArrangementLocation(int x, int y)
     {
-        foreach(var cam in this.Cameras)
+        foreach (var cam in this.Cameras)
         {
-           var arrangeLoc = cam.arrangementLocation;
+            var arrangeLoc = cam.arrangementLocation;
             if (arrangeLoc.x == x && arrangeLoc.y == y)
             {
                 return cam;
@@ -211,8 +221,8 @@ public class UGLMultiScreen : MonoBehaviour
             Vector3 relativeMouseAndDisplay = Display.RelativeMouseAt(mousePosition);
             if (relativeMouseAndDisplay != Vector3.zero)
             {
-               
-                displayNumber = (int)relativeMouseAndDisplay.z ;
+
+                displayNumber = (int)relativeMouseAndDisplay.z;
                 screenPosition = relativeMouseAndDisplay.withZ(0);
                 return GetCameraByOutputScreen(displayNumber);
             }
@@ -224,7 +234,7 @@ public class UGLMultiScreen : MonoBehaviour
             Vector3 vpPosition = cam.camera.ScreenToViewportPoint(Input.mousePosition);
             if (XUUtil.NumberIsBetween(vpPosition.x, 0, 1) && XUUtil.NumberIsBetween(vpPosition.y, 0, 1))
             {
-   
+
                 chosenCam = cam;
                 break;
             }
@@ -385,15 +395,15 @@ public class UGLMultiScreen : MonoBehaviour
 
             GUILayout.Space(10);
 
-            
+
 
             GUILayout.BeginHorizontal();
-            
+
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
 
-     
+
 
             GUILayout.BeginVertical(GUILayout.Width(160));
             GUILayout.Label($"Screen Arangement ({script.nAssigned}/{N_MONITORS})");
@@ -405,7 +415,7 @@ public class UGLMultiScreen : MonoBehaviour
                     int idx = yi * N_MONITORS + xi;
                     var curVal = script.arrangementGrid[idx];
                     var nuVal = GUILayout.Toggle(curVal, "", GUILayout.Width(15));
-                    
+
 
                     if (nuVal != curVal)
                     {
@@ -428,7 +438,7 @@ public class UGLMultiScreen : MonoBehaviour
 
             GUILayout.EndHorizontal();
 
-       
+
 
             GUILayout.Space(10);
 
@@ -483,7 +493,7 @@ public class UGLMultiScreen : MonoBehaviour
 
         void drawScreenSimulationSection(ref bool changed)
         {
-            
+
             var script = target as UGLMultiScreen;
             GUILayout.Label("   Single Screen Simulation");
             GUILayout.BeginHorizontal();
@@ -523,7 +533,7 @@ public class UGLMultiScreen : MonoBehaviour
 
     //    var cam = UGLMultiScreen.Current.GetCameraForMousePosition(Input.mousePosition, out var screenPosFixed, out var display);
     //    var pos = screenPosFixed;// Input.mousePosition;
-        
+
     //    if (display >= 0)
     //    {
     //        pos.y = Display.displays[display].renderingHeight - pos.y;
